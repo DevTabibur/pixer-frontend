@@ -17,13 +17,16 @@ import {
 } from '@/utils/auth-utils';
 import { Permission } from '@/types';
 import { useRegisterMutation } from '@/data/user';
+import { toast } from 'react-toastify';
 
 type FormValues = {
   name: string;
   email: string;
   password: string;
   permission: Permission;
+  role: "user"
 };
+
 const registrationFormSchema = yup.object().shape({
   name: yup.string().required('form:error-name-required'),
   email: yup
@@ -31,8 +34,11 @@ const registrationFormSchema = yup.object().shape({
     .email('form:error-email-format')
     .required('form:error-email-required'),
   password: yup.string().required('form:error-password-required'),
-  permission: yup.string().default('store_owner').oneOf(['store_owner']),
+  permission: yup.string().required(), // No need for oneOf, since it's always "user"
+  role: yup.string().required(), // Hardcoded, so only need required validation
 });
+
+//!====================================================================================>>>
 const RegistrationForm = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { mutate: registerUser, isLoading: loading } = useRegisterMutation();
@@ -45,36 +51,54 @@ const RegistrationForm = () => {
   } = useForm({
     resolver: yupResolver(registrationFormSchema),
     defaultValues: {
-      permission: Permission.StoreOwner,
+      permission: "user",
+      role: "user",
     },
   });
   const router = useRouter();
   const { t } = useTranslation();
 
-  async function onSubmit({ name, email, password, permission }: FormValues) {
+  async function onSubmit({ name, email, password }: FormValues) {
     registerUser(
       {
         name,
         email,
         password,
         //@ts-ignore
-        permission,
+        permission: "user", // Hardcoded
+        role: "user", // Hardcoded
       },
-
       {
         onSuccess: (data) => {
-          if (data?.token) {
-            if (hasAccess(allowedRoles, data?.permissions)) {
-              setAuthCredentials(data?.token, data?.permissions, data?.role);
-              router.push(Routes.dashboard);
+          // Ensure data exists and there is an accessToken
+          if (data?.data && data?.data?.accessToken) {
+            toast.success("Registered Successfully!");
+
+            if (hasAccess(allowedRoles, data?.data?.data.role)) {
+              setAuthCredentials(
+                data?.data?.accessToken,
+                data?.data?.data.role,
+                data?.data?.data.role
+              );
+
+              setTimeout(() => {
+                router.push(Routes.dashboard);
+              }, 500);
+
               return;
+            } else {
+              setErrorMessage('form:error-enough-permission');
             }
-            setErrorMessage('form:error-enough-permission');
           } else {
             setErrorMessage('form:error-credential-wrong');
           }
         },
         onError: (error: any) => {
+          console.log('error', error);
+          if (error?.response?.data) {
+            toast.error(error.response.data.message);
+          }
+
           Object.keys(error?.response?.data).forEach((field: any) => {
             setError(field, {
               type: 'manual',
@@ -82,7 +106,7 @@ const RegistrationForm = () => {
             });
           });
         },
-      },
+      }
     );
   }
 

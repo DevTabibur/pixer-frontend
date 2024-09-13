@@ -20,6 +20,7 @@ import axios from 'axios';
 import { setEmailVerified } from '@/utils/auth-utils';
 import { type } from 'os';
 
+
 export const useMeQuery = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -50,12 +51,12 @@ export const useMeQuery = () => {
           return;
         }
         queryClient.clear();
+        console.log('login route');
         router.replace(Routes.login);
       }
     },
   });
 };
-
 export function useLogin() {
   return useMutation(userClient.login);
 }
@@ -132,7 +133,6 @@ export const useChangePasswordMutation = () => {
   return useMutation(userClient.changePassword);
 };
 
-
 export const useForgetPasswordMutation = () => {
   return useMutation(userClient.forgetPassword);
 };
@@ -172,8 +172,6 @@ export const useVerifyForgetPasswordTokenMutation = () => {
 export const useResetPasswordMutation = () => {
   return useMutation(userClient.resetPassword);
 };
-
-
 
 export const useMakeOrRevokeAdminMutation = () => {
   const queryClient = useQueryClient();
@@ -248,7 +246,7 @@ export const useUserQuery = ({ id }: { id: string }) => {
     () => userClient.fetchUser({ id }),
     {
       enabled: Boolean(id),
-    }
+    },
   );
 };
 
@@ -258,7 +256,7 @@ export const useUsersQuery = (params: Partial<QueryOptionsType>) => {
     () => userClient.fetchUsers(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -275,7 +273,7 @@ export const useAdminsQuery = (params: Partial<QueryOptionsType>) => {
     () => userClient.fetchAdmins(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -292,7 +290,7 @@ export const useVendorsQuery = (params: Partial<UserQueryOptions>) => {
     () => userClient.fetchVendors(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -309,7 +307,7 @@ export const useCustomersQuery = (params: Partial<UserQueryOptions>) => {
     () => userClient.fetchCustomers(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -320,14 +318,15 @@ export const useCustomersQuery = (params: Partial<UserQueryOptions>) => {
   };
 };
 
-
-export const useMyStaffsQuery = (params: Partial<UserQueryOptions & { shop_id: string }>) => {
+export const useMyStaffsQuery = (
+  params: Partial<UserQueryOptions & { shop_id: string }>,
+) => {
   const { data, isLoading, error } = useQuery<UserPaginator, Error>(
     [API_ENDPOINTS.MY_STAFFS, params],
     () => userClient.getMyStaffs(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -338,14 +337,13 @@ export const useMyStaffsQuery = (params: Partial<UserQueryOptions & { shop_id: s
   };
 };
 
-
 export const useAllStaffsQuery = (params: Partial<UserQueryOptions>) => {
   const { data, isLoading, error } = useQuery<UserPaginator, Error>(
     [API_ENDPOINTS.ALL_STAFFS, params],
     () => userClient.getAllStaffs(params),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {
@@ -355,4 +353,3 @@ export const useAllStaffsQuery = (params: Partial<UserQueryOptions>) => {
     error,
   };
 };
-

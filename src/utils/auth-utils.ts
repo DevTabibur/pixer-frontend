@@ -1,6 +1,7 @@
 import Cookie from 'js-cookie';
 import SSRCookie from 'cookie';
 import {
+  ADMIN,
   AUTH_CRED,
   EMAIL_VERIFIED,
   PERMISSIONS,
@@ -8,9 +9,10 @@ import {
   STORE_OWNER,
   SUPER_ADMIN,
   TOKEN,
+  USER,
 } from './constants';
 
-export const allowedRoles = [SUPER_ADMIN, STORE_OWNER, STAFF];
+export const allowedRoles = [SUPER_ADMIN, STORE_OWNER, STAFF, USER, ADMIN];
 export const adminAndOwnerOnly = [SUPER_ADMIN, STORE_OWNER];
 export const adminOwnerAndStaffOnly = [SUPER_ADMIN, STORE_OWNER, STAFF];
 export const adminOnly = [SUPER_ADMIN];
@@ -53,15 +55,16 @@ export function parseSSRCookie(context: any) {
 
 export function hasAccess(
   _allowedRoles: string[],
-  _userPermissions: string[] | undefined | null
+  _userPermissions: string[] | undefined | null,
 ) {
   if (_userPermissions) {
     return Boolean(
-      _allowedRoles?.find((aRole) => _userPermissions.includes(aRole))
+      _allowedRoles?.find((aRole) => _userPermissions.includes(aRole)),
     );
   }
   return false;
 }
+
 export function isAuthenticated(_cookies: any) {
   return (
     !!_cookies[TOKEN] &&

@@ -151,6 +151,9 @@ export enum Permission {
   StoreOwner = 'store_owner',
   Staff = 'staff',
   Customer = 'customer',
+  //!=======================>>>
+  Admin = 'admin',
+  User = 'user',
 }
 
 export interface GetParams {
@@ -193,6 +196,7 @@ export interface LoginInput {
 }
 
 export interface AuthResponse {
+  [x: string]: any;
   token: string;
   permissions: string[];
   role: string;

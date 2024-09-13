@@ -16,6 +16,7 @@ import {
   hasAccess,
   setAuthCredentials,
 } from '@/utils/auth-utils';
+import { toast } from 'react-toastify';
 
 const loginFormSchema = yup.object().shape({
   email: yup
@@ -25,8 +26,8 @@ const loginFormSchema = yup.object().shape({
   password: yup.string().required('form:error-password-required'),
 });
 const defaultValues = {
-  email: "admin@demo.com",
-  password: "demodemo",
+  email: "",
+  password: "",
 };
 
 const LoginForm = () => {
@@ -42,21 +43,36 @@ const LoginForm = () => {
       },
       {
         onSuccess: (data) => {
-          if (data?.token) {
-            if (hasAccess(allowedRoles, data?.permissions)) {
-              setAuthCredentials(data?.token, data?.permissions, data?.role);
-              Router.push(Routes.dashboard);
-              return;
+         
+
+          if (data?.data) {
+            toast.success("Login Successfully!");
+
+            if (data?.data?.accessToken) {
+              if (hasAccess(allowedRoles, data?.data?.data.role)) {
+                setAuthCredentials(data?.data?.accessToken, data?.data?.data.role, data?.data?.data.role);
+
+                setTimeout(() => {
+                  Router.push(Routes.dashboard);
+                }, 500);
+
+                return;
+              }
+              setErrorMessage('form:error-enough-permission');
             }
-            setErrorMessage('form:error-enough-permission');
           } else {
             setErrorMessage('form:error-credential-wrong');
           }
         },
-        onError: () => {},
+        onError: (error: any) => {
+          if (error?.response?.data) {
+            toast.error(error?.response?.data?.message || "Something went wrong!");
+          }
+        },
       }
     );
   }
+
 
   return (
     <>
